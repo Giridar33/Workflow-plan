@@ -1,0 +1,608 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .header { padding: 1.5rem 1.5rem 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .header h1 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+  .badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+  .badge-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .badge-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+
+  .tabs { display: flex; gap: 0; padding: 1rem 1.5rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .tab { font-size: 13px; font-weight: 400; color: var(--color-text-secondary); padding: 6px 14px; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .tab.active { color: var(--color-text-primary); font-weight: 500; border-bottom-color: var(--color-text-primary); }
+  .tab:hover:not(.active) { color: var(--color-text-primary); }
+
+  .panel { padding: 1.25rem 1.5rem; display: none; }
+  .panel.active { display: block; }
+
+  /* TIMELINE */
+  .day-header { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: none; letter-spacing: 0; margin-bottom: 8px; padding: 4px 10px; background: var(--color-background-secondary); border-radius: 6px; display: inline-block; }
+  .day-block { margin-bottom: 1.5rem; }
+  .phase-row { display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; margin-bottom: 8px; }
+  .phase-time { font-size: 11px; color: var(--color-text-tertiary); padding-top: 8px; }
+  .phase-bar { border-radius: var(--border-radius-md); padding: 8px 12px; position: relative; }
+  .phase-bar h3 { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .phase-bar p { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .phase-devs { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .dev-chip { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; }
+
+  .p-setup    { background: #E6F1FB; }
+  .p-setup h3 { color: #0C447C; }
+  .p-setup p  { color: #185FA5; }
+  .p-setup .dev-chip { background: #B5D4F4; color: #0C447C; }
+
+  .p-core     { background: #EEEDFE; }
+  .p-core h3  { color: #3C3489; }
+  .p-core p   { color: #534AB7; }
+  .p-core .dev-chip { background: #CECBF6; color: #3C3489; }
+
+  .p-ui       { background: #E1F5EE; }
+  .p-ui h3    { color: #085041; }
+  .p-ui p     { color: #0F6E56; }
+  .p-ui .dev-chip { background: #9FE1CB; color: #085041; }
+
+  .p-int      { background: #FAEEDA; }
+  .p-int h3   { color: #633806; }
+  .p-int p    { color: #854F0B; }
+  .p-int .dev-chip { background: #FAC775; color: #633806; }
+
+  .p-test     { background: #FCEBEB; }
+  .p-test h3  { color: #791F1F; }
+  .p-test p   { color: #A32D2D; }
+  .p-test .dev-chip { background: #F7C1C1; color: #791F1F; }
+
+  .p-qa       { background: #EAF3DE; }
+  .p-qa h3    { color: #27500A; }
+  .p-qa p     { color: #3B6D11; }
+  .p-qa .dev-chip { background: #C0DD97; color: #27500A; }
+
+  @media (prefers-color-scheme: dark) {
+    .p-setup    { background: #042C53; }
+    .p-setup h3 { color: #B5D4F4; }
+    .p-setup p  { color: #85B7EB; }
+    .p-setup .dev-chip { background: #0C447C; color: #B5D4F4; }
+
+    .p-core     { background: #26215C; }
+    .p-core h3  { color: #CECBF6; }
+    .p-core p   { color: #AFA9EC; }
+    .p-core .dev-chip { background: #3C3489; color: #CECBF6; }
+
+    .p-ui       { background: #04342C; }
+    .p-ui h3    { color: #9FE1CB; }
+    .p-ui p     { color: #5DCAA5; }
+    .p-ui .dev-chip { background: #085041; color: #9FE1CB; }
+
+    .p-int      { background: #412402; }
+    .p-int h3   { color: #FAC775; }
+    .p-int p    { color: #EF9F27; }
+    .p-int .dev-chip { background: #633806; color: #FAC775; }
+
+    .p-test     { background: #501313; }
+    .p-test h3  { color: #F7C1C1; }
+    .p-test p   { color: #F09595; }
+    .p-test .dev-chip { background: #791F1F; color: #F7C1C1; }
+
+    .p-qa       { background: #173404; }
+    .p-qa h3    { color: #C0DD97; }
+    .p-qa p     { color: #97C459; }
+    .p-qa .dev-chip { background: #27500A; color: #C0DD97; }
+  }
+
+  /* TEAM */
+  .dev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .dev-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px; }
+  .dev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .dev-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .dev-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .dev-role { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+  .task-list { list-style: none; }
+  .task-list li { font-size: 11px; color: var(--color-text-secondary); padding: 3px 0; border-top: 0.5px solid var(--color-border-tertiary); display: flex; align-items: flex-start; gap: 5px; }
+  .task-list li:first-child { border-top: none; }
+  .task-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+  /* TASKS */
+  .task-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .task-table th { text-align: left; padding: 6px 10px; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .task-table td { padding: 7px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: top; color: var(--color-text-primary); }
+  .task-table tr:last-child td { border-bottom: none; }
+  .priority-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  /* SUMMARY */
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px; }
+  .stat-label { font-size: 11px; color: var(--color-text-secondary); }
+  .stat-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-top: 2px; }
+  .stat-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1px; }
+  .deliverable-list { list-style: none; }
+  .deliverable-list li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; color: var(--color-text-primary); }
+  .deliverable-list li:last-child { border-bottom: none; }
+  .check { width: 16px; height: 16px; border-radius: 50%; background: var(--color-background-success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .check svg { width: 9px; height: 9px; stroke: var(--color-text-success); stroke-width: 2.5; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; }
+</style>
+
+<h2 class="sr-only">Roundu 2-day sprint workflow for 6 developers — timeline, team assignments, task list, and summary</h2>
+
+<div class="header">
+  <h1>Roundu — 2-day sprint plan</h1>
+  <p>6 developers · Vite + React + Shadcn/UI · Starting from existing codebase</p>
+</div>
+
+<div class="meta-row">
+  <span class="badge badge-blue">Day 1 — Foundation & screens</span>
+  <span class="badge badge-green">Day 2 — Integration & polish</span>
+  <span class="badge badge-amber">6 developers</span>
+  <span class="badge badge-red">28 tasks total</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('timeline')">Timeline</div>
+  <div class="tab" onclick="switchTab('team')">Team</div>
+  <div class="tab" onclick="switchTab('tasks')">All tasks</div>
+  <div class="tab" onclick="switchTab('summary')">Summary</div>
+</div>
+
+<!-- TIMELINE -->
+<div class="panel active" id="panel-timeline">
+  <div class="day-block">
+    <div class="day-header">Day 1 — Friday, Apr 18 · Foundation, routing & screens</div>
+
+    <div class="phase-row">
+      <div class="phase-time">9:00 – 10:00</div>
+      <div class="phase-bar p-setup">
+        <h3>Kickoff + repo setup</h3>
+        <p>Branch strategy, design token review, task hand-off, Stitch design walkthrough</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">Dev 2</span>
+          <span class="dev-chip">Dev 3</span>
+          <span class="dev-chip">Dev 4</span>
+          <span class="dev-chip">Dev 5</span>
+          <span class="dev-chip">Dev 6</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">10:00 – 13:00</div>
+      <div class="phase-bar p-core">
+        <h3>Core app shell + routing</h3>
+        <p>App.tsx routing refactor, MobileLayout, BottomNav, global theme tokens & index.css; role-based route guards (customer vs provider)</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">Dev 2 (Routing)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">10:00 – 13:00</div>
+      <div class="phase-bar p-ui">
+        <h3>Login + role selection screens</h3>
+        <p>LoginScreen OTP flow, Google/Apple OAuth placeholders, RoleSelectionScreen animations, form validation with react-hook-form + zod</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 3 (Auth UI)</span>
+          <span class="dev-chip">Dev 4 (Forms)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">10:00 – 13:00</div>
+      <div class="phase-bar p-int">
+        <h3>Home screen + services screen</h3>
+        <p>HomeScreen hero, category grid, top providers list, ServicesScreen all-services grid, emergency CTA card</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 5 (Home)</span>
+          <span class="dev-chip">Dev 6 (Services)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">13:00 – 14:00</div>
+      <div class="phase-bar p-setup">
+        <h3>Lunch sync + PR reviews</h3>
+        <p>Mid-day check-in, merge feature branches to develop, resolve conflicts, re-align on afternoon scope</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">14:00 – 18:00</div>
+      <div class="phase-bar p-core">
+        <h3>Provider list + location screens</h3>
+        <p>ProviderListScreen filter chips (All/Top Rated/Nearest), search bar, card layout; LocationScreen map placeholder + geolocation hook</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Providers)</span>
+          <span class="dev-chip">Dev 2 (Location)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">14:00 – 18:00</div>
+      <div class="phase-bar p-ui">
+        <h3>Shared UI components</h3>
+        <p>ProviderCard, ServiceChip, RatingStars, EmergencyBanner, Avatar with initials, BookingButton — all built from shadcn/ui primitives</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 3 (Components)</span>
+          <span class="dev-chip">Dev 4 (Components)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">14:00 – 18:00</div>
+      <div class="phase-bar p-int">
+        <h3>State management + mock API layer</h3>
+        <p>React Query setup, mock JSON data (providers, services, categories), useProviders / useServices hooks, localStorage for auth state</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 5 (State)</span>
+          <span class="dev-chip">Dev 6 (Mock API)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">18:00 – 19:00</div>
+      <div class="phase-bar p-test">
+        <h3>Day 1 code freeze + QA pass</h3>
+        <p>All branches merged to develop, basic smoke test on all screens, bug log created, Day 2 tasks confirmed</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">Dev 3 (QA)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="day-header">Day 2 — Saturday, Apr 19 · Integration, animation & delivery</div>
+
+    <div class="phase-row">
+      <div class="phase-time">9:00 – 9:30</div>
+      <div class="phase-bar p-setup">
+        <h3>Stand-up + bug triage</h3>
+        <p>Review Day 1 bug log, reassign blockers, confirm delivery checklist</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">All devs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">9:30 – 12:30</div>
+      <div class="phase-bar p-int">
+        <h3>Wire screens end-to-end</h3>
+        <p>Connect navigation flow: Role → Login → Home → Services → Providers → Location. Stitch-style transitions, animated bottom nav active states</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Nav flow)</span>
+          <span class="dev-chip">Dev 2 (Transitions)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">9:30 – 12:30</div>
+      <div class="phase-bar p-ui">
+        <h3>Booking flow + provider detail</h3>
+        <p>ProviderDetailScreen (modal or sheet), time-slot picker, booking confirmation screen, Sonner toast notifications</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 3 (Detail screen)</span>
+          <span class="dev-chip">Dev 4 (Booking flow)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">9:30 – 12:30</div>
+      <div class="phase-bar p-core">
+        <h3>Animations + design polish</h3>
+        <p>Implement animate-fade-in-up delays across all screens, glass-card hover states, gradient-accent tuning, dark mode verification, mobile viewport fixes</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 5 (Animations)</span>
+          <span class="dev-chip">Dev 6 (Design QA)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">12:30 – 13:30</div>
+      <div class="phase-bar p-setup">
+        <h3>Lunch sync + integration merge</h3>
+        <p>Final branch merges, resolve integration conflicts, run vite build to catch TS errors</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">Dev 2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">13:30 – 16:00</div>
+      <div class="phase-bar p-test">
+        <h3>Testing + bug fixes</h3>
+        <p>Run vitest suite, fix failing tests, cross-browser check (Chrome/Safari/Firefox), mobile viewport test (375px, 390px, 430px)</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 3 (Tests)</span>
+          <span class="dev-chip">Dev 4 (Fixes)</span>
+          <span class="dev-chip">Dev 5 (Mobile)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">13:30 – 16:00</div>
+      <div class="phase-bar p-qa">
+        <h3>README + handoff docs</h3>
+        <p>Update README with run instructions, document component API, write screen navigation map, prepare demo script</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 6 (Docs)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">16:00 – 17:30</div>
+      <div class="phase-bar p-qa">
+        <h3>Final QA + demo prep</h3>
+        <p>Full end-to-end walkthrough of all user flows, stakeholder demo recording/rehearsal, production build verification</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">Dev 2</span>
+          <span class="dev-chip">Dev 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-time">17:30 – 18:00</div>
+      <div class="phase-bar p-core">
+        <h3>Delivery + retrospective</h3>
+        <p>Tag release v0.1.0, push to main, share demo link, 15-min retro on what worked and blockers</p>
+        <div class="phase-devs">
+          <span class="dev-chip">Dev 1 (Lead)</span>
+          <span class="dev-chip">All devs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div class="panel" id="panel-team">
+  <div class="dev-grid">
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#E6F1FB;color:#185FA5">D1</div>
+        <div>
+          <div class="dev-name">Dev 1 — Tech Lead</div>
+          <div class="dev-role">Architecture, routing, PRs, delivery</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#185FA5"></span>App.tsx routing refactor + route guards</li>
+        <li><span class="task-dot" style="background:#185FA5"></span>Provider list screen</li>
+        <li><span class="task-dot" style="background:#185FA5"></span>End-to-end nav flow wiring (Day 2)</li>
+        <li><span class="task-dot" style="background:#185FA5"></span>All PR reviews + merges</li>
+        <li><span class="task-dot" style="background:#185FA5"></span>Demo walkthrough + release tag</li>
+      </ul>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#EEEDFE;color:#534AB7">D2</div>
+        <div>
+          <div class="dev-name">Dev 2 — Frontend (Routing & Location)</div>
+          <div class="dev-role">Navigation, location, screen transitions</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#534AB7"></span>MobileLayout + BottomNav component</li>
+        <li><span class="task-dot" style="background:#534AB7"></span>LocationScreen + geolocation hook</li>
+        <li><span class="task-dot" style="background:#534AB7"></span>Screen transitions + animation tuning</li>
+        <li><span class="task-dot" style="background:#534AB7"></span>Day 2 integration merge support</li>
+      </ul>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#E1F5EE;color:#0F6E56">D3</div>
+        <div>
+          <div class="dev-name">Dev 3 — Frontend (Auth + Testing)</div>
+          <div class="dev-role">Auth screens, shared components, QA</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#0F6E56"></span>LoginScreen + OTP input</li>
+        <li><span class="task-dot" style="background:#0F6E56"></span>ProviderCard + RatingStars components</li>
+        <li><span class="task-dot" style="background:#0F6E56"></span>ProviderDetailScreen modal/sheet</li>
+        <li><span class="task-dot" style="background:#0F6E56"></span>vitest suite + Day 1 QA pass</li>
+      </ul>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#FAEEDA;color:#854F0B">D4</div>
+        <div>
+          <div class="dev-name">Dev 4 — Frontend (Forms + Booking)</div>
+          <div class="dev-role">Form validation, booking flow</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#854F0B"></span>RoleSelectionScreen + animations</li>
+        <li><span class="task-dot" style="background:#854F0B"></span>react-hook-form + zod validation</li>
+        <li><span class="task-dot" style="background:#854F0B"></span>ServiceChip + BookingButton components</li>
+        <li><span class="task-dot" style="background:#854F0B"></span>Booking confirmation + Sonner toasts</li>
+        <li><span class="task-dot" style="background:#854F0B"></span>Bug fixes (Day 2 afternoon)</li>
+      </ul>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#FCEBEB;color:#A32D2D">D5</div>
+        <div>
+          <div class="dev-name">Dev 5 — Frontend (Home + State)</div>
+          <div class="dev-role">Home screen, state management, animations</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#A32D2D"></span>HomeScreen — hero, categories, providers</li>
+        <li><span class="task-dot" style="background:#A32D2D"></span>React Query setup + useProviders hook</li>
+        <li><span class="task-dot" style="background:#A32D2D"></span>Emergency banner CTA</li>
+        <li><span class="task-dot" style="background:#A32D2D"></span>animate-fade-in-up across all screens</li>
+        <li><span class="task-dot" style="background:#A32D2D"></span>Mobile viewport testing (Day 2)</li>
+      </ul>
+    </div>
+
+    <div class="dev-card">
+      <div class="dev-top">
+        <div class="dev-avatar" style="background:#EAF3DE;color:#3B6D11">D6</div>
+        <div>
+          <div class="dev-name">Dev 6 — Full-stack (API + Docs)</div>
+          <div class="dev-role">Mock API, services screen, documentation</div>
+        </div>
+      </div>
+      <ul class="task-list">
+        <li><span class="task-dot" style="background:#3B6D11"></span>ServicesScreen — all-services grid</li>
+        <li><span class="task-dot" style="background:#3B6D11"></span>Mock JSON data layer + useServices hook</li>
+        <li><span class="task-dot" style="background:#3B6D11"></span>localStorage auth persistence</li>
+        <li><span class="task-dot" style="background:#3B6D11"></span>Design QA pass (dark mode, colors)</li>
+        <li><span class="task-dot" style="background:#3B6D11"></span>README + handoff documentation</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="panel" id="panel-tasks">
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Owner</th>
+        <th>Day</th>
+        <th>Priority</th>
+      </tr>
+    </thead>
+    <tbody id="task-tbody"></tbody>
+  </table>
+</div>
+
+<!-- SUMMARY -->
+<div class="panel" id="panel-summary">
+  <div class="summary-grid">
+    <div class="stat-card">
+      <div class="stat-label">Developers</div>
+      <div class="stat-val">6</div>
+      <div class="stat-sub">1 lead + 5 devs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sprint days</div>
+      <div class="stat-val">2</div>
+      <div class="stat-sub">Apr 18–19</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Screens</div>
+      <div class="stat-val">7</div>
+      <div class="stat-sub">role→login→home+</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total tasks</div>
+      <div class="stat-val">28</div>
+      <div class="stat-sub">across 2 days</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 1.25rem;">
+    <div class="section-title">Deliverables at end of Day 2</div>
+    <ul class="deliverable-list">
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> All 7 screens built and connected end-to-end</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> Stitch-aligned design with custom colour theme applied</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> Booking flow with Sonner toast notifications</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> Mock API layer — providers, services, categories data</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> Reusable component library (ProviderCard, ServiceChip, etc.)</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> vitest suite passing, mobile-tested at 375/390/430px</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> README + handoff documentation + demo script</li>
+      <li><div class="check"><svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3"/></svg></div> v0.1.0 release tag on main branch</li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="section-title">Branch strategy</div>
+    <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.8;">
+      <strong style="color: var(--color-text-primary)">main</strong> → protected, tagged releases only<br>
+      <strong style="color: var(--color-text-primary)">develop</strong> → integration branch, PRs target here<br>
+      <strong style="color: var(--color-text-primary)">feat/routing-shell</strong> (Dev 1) · <strong style="color: var(--color-text-primary)">feat/auth-screens</strong> (Dev 3) · <strong style="color: var(--color-text-primary)">feat/home-services</strong> (Dev 5/6)<br>
+      <strong style="color: var(--color-text-primary)">feat/providers-location</strong> (Dev 2) · <strong style="color: var(--color-text-primary)">feat/components</strong> (Dev 3/4) · <strong style="color: var(--color-text-primary)">feat/booking-flow</strong> (Dev 4)
+    </div>
+  </div>
+</div>
+
+<script>
+const tasks = [
+  { task: "App.tsx routing refactor + route guards", owner: "Dev 1", day: "Day 1 AM", pri: "Critical" },
+  { task: "MobileLayout + BottomNav component", owner: "Dev 2", day: "Day 1 AM", pri: "Critical" },
+  { task: "LoginScreen + phone OTP input", owner: "Dev 3", day: "Day 1 AM", pri: "Critical" },
+  { task: "RoleSelectionScreen + animations", owner: "Dev 4", day: "Day 1 AM", pri: "Critical" },
+  { task: "HomeScreen — hero, categories, top providers", owner: "Dev 5", day: "Day 1 AM", pri: "Critical" },
+  { task: "ServicesScreen — all-services grid", owner: "Dev 6", day: "Day 1 AM", pri: "Critical" },
+  { task: "Global theme tokens + index.css tuning", owner: "Dev 1", day: "Day 1 AM", pri: "High" },
+  { task: "Google / Apple OAuth placeholder buttons", owner: "Dev 3", day: "Day 1 AM", pri: "Medium" },
+  { task: "react-hook-form + zod for login form", owner: "Dev 4", day: "Day 1 AM", pri: "High" },
+  { task: "Provider list screen + filter chips", owner: "Dev 1", day: "Day 1 PM", pri: "Critical" },
+  { task: "LocationScreen + useGeolocation hook", owner: "Dev 2", day: "Day 1 PM", pri: "High" },
+  { task: "ProviderCard component", owner: "Dev 3", day: "Day 1 PM", pri: "High" },
+  { task: "ServiceChip + BookingButton components", owner: "Dev 4", day: "Day 1 PM", pri: "High" },
+  { task: "React Query setup + useProviders hook", owner: "Dev 5", day: "Day 1 PM", pri: "High" },
+  { task: "Mock JSON data — providers / services", owner: "Dev 6", day: "Day 1 PM", pri: "High" },
+  { task: "RatingStars + Avatar initials components", owner: "Dev 3", day: "Day 1 PM", pri: "Medium" },
+  { task: "localStorage auth state persistence", owner: "Dev 6", day: "Day 1 PM", pri: "Medium" },
+  { task: "Emergency banner CTA card", owner: "Dev 5", day: "Day 1 PM", pri: "Medium" },
+  { task: "Day 1 QA pass + bug log", owner: "Dev 1 + Dev 3", day: "Day 1 EOD", pri: "Critical" },
+  { task: "End-to-end nav flow wiring", owner: "Dev 1", day: "Day 2 AM", pri: "Critical" },
+  { task: "Screen transitions + animation tuning", owner: "Dev 2", day: "Day 2 AM", pri: "High" },
+  { task: "ProviderDetailScreen (modal/sheet)", owner: "Dev 3", day: "Day 2 AM", pri: "High" },
+  { task: "Booking flow + confirmation screen", owner: "Dev 4", day: "Day 2 AM", pri: "High" },
+  { task: "animate-fade-in-up across all screens", owner: "Dev 5", day: "Day 2 AM", pri: "High" },
+  { task: "Design QA — dark mode, colours, spacing", owner: "Dev 6", day: "Day 2 AM", pri: "High" },
+  { task: "Sonner toast notifications", owner: "Dev 4", day: "Day 2 AM", pri: "Medium" },
+  { task: "vitest suite + mobile viewport tests", owner: "Dev 3 + Dev 5", day: "Day 2 PM", pri: "Critical" },
+  { task: "README + handoff docs + demo script", owner: "Dev 6", day: "Day 2 PM", pri: "High" },
+];
+
+const colours = { Critical: "#E24B4A", High: "#BA7517", Medium: "#1D9E75" };
+
+const tbody = document.getElementById('task-tbody');
+tasks.forEach(t => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${t.task}</td>
+    <td style="color:var(--color-text-secondary);white-space:nowrap">${t.owner}</td>
+    <td style="color:var(--color-text-secondary);white-space:nowrap">${t.day}</td>
+    <td style="white-space:nowrap"><span class="priority-dot" style="background:${colours[t.pri]}"></span>${t.pri}</td>`;
+  tbody.appendChild(tr);
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['timeline','team','tasks','summary'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
+}
+</script>
